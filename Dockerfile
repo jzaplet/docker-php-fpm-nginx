@@ -1,17 +1,18 @@
-FROM php:8.2-fpm
+FROM php:8.2-fpm-alpine
 
-RUN apt-get update
+RUN apk add openssl curl ca-certificates
+RUN apk add nginx
+RUN apk add libpq-dev
+RUN apk add bash
 
-# Install nginx
-RUN apt-get install nginx -y
-COPY docker/nginx.conf /etc/nginx/sites-enabled/default
+# Nginx & PHP configs
+COPY ./docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/nginx/http.d/default.conf /etc/nginx/http.d/default.conf
+#COPY ./docker/php/extensions/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Install PHP extensions https://github.com/mlocati/docker-php-extension-installer#supported-php-extensions
-RUN apt-get install libpq-dev -y
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
 RUN docker-php-ext-install pdo pdo_pgsql
-
-#COPY docker/new/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 #RUN docker-php-ext-install opcache
 
 # Install composer
